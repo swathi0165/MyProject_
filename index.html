@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mental Health Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    
+    <h1>🧠 Mental Health Detector</h1>
+
+    <!-- LOGOUT BUTTON -->
+    <div style="text-align:right;">
+        <a href="/logout">
+            <button style="padding:6px 12px; font-size:12px;">Logout</button>
+        </a>
+    </div>
+
+    <!-- INPUT -->
+    <textarea id="text" placeholder="How are you feeling today...?"></textarea><br>
+
+    <!-- BUTTON -->
+    <button onclick="predictEmotion()">Analyze Emotion</button>
+
+    <!-- RESULT -->
+    <div id="result"></div>
+
+    <!-- RECOMMENDATION -->
+    <div id="recommendation"></div>
+
+</div>
+
+<script>
+function predictEmotion() {
+    let text = document.getElementById("text").value;
+
+    if (text.trim() === "") {
+        alert("Please enter some text!");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("text", text);
+
+    fetch("/predict", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        // ✅ SHOW RESULT WITH EMOJI
+        document.getElementById("result").innerHTML =
+            "Emotion: <b style='font-size:24px'>" 
+            + data.prediction + data.emoji + "</b><br>" +
+            "Confidence: <b>" + data.confidence + "%</b>";
+
+        // ✅ SHOW RECOMMENDATION
+        if (data.recommendation) {
+            document.getElementById("recommendation").innerHTML =
+                data.recommendation;
+        } else {
+            document.getElementById("recommendation").innerHTML = "";
+        }
+
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Something went wrong!");
+    });
+}
+</script>
+
+</body>
+</html>
